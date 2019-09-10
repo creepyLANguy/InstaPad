@@ -35,18 +35,15 @@ void GetAllImagesInCurrentFolder(vector<wstring>& v)
 
 void main()
 {
-  //AL.
-  //For debugging!
-  #ifdef _DEBUG
+#ifdef _DEBUG
   MessageBox(nullptr, L"Attach", L"", 0);
-  #endif
-  //
+#endif
 
   vector<wstring> allImagesInCurrentFolder;
   GetAllImagesInCurrentFolder(allImagesInCurrentFolder);
 
   cout << "Images found in folder:\n\n";
-  for (auto f : allImagesInCurrentFolder)
+  for (const auto f : allImagesInCurrentFolder)
   {
     wcout << f << L"\n";
   }
@@ -55,40 +52,35 @@ void main()
 
   for (wstring ws : allImagesInCurrentFolder)
   {
-    string s(ws.begin(), ws.end());
-    const cv::Mat src = cv::imread(s);
+    const string filename(ws.begin(), ws.end());
+    const cv::Mat src = cv::imread(filename);
     const int maxLen = max(src.rows, src.cols);
     cv::Mat square = cv::Mat(maxLen, maxLen, src.type());
 
     if (maxLen == 0)
     {
+      cout << "ERROR READING " + filename + "\n";
       continue;
     }
 
-    cout << "converting " + s + "\n";
-
-    const int xDiff = maxLen - src.cols;
-    const int yDiff = maxLen - src.rows;
-
-    const cv::Point startPosition = cv::Point(static_cast<int>(xDiff / 2), static_cast<int>(yDiff / 2));
+    cout << "Converting " + filename + "\n";
 
     //Paint square white
-    const cv::Vec3b white = cv::Vec3b(255, 255, 255);
-    for (int r = 0; r < maxLen; ++ r )
-    {
-      for (int c = 0; c < maxLen; ++c)
-      {
-        square.at<cv::Vec3b>(cv::Point(c, r)) = white;
-      }
-    }
+    square.setTo(cv::Scalar(255, 255, 255));
+    
+    //Paint in image from adjusted starting point
+    const int xDiff = maxLen - src.cols;
+    const int yDiff = maxLen - src.rows;
+    const int startPosition_x = static_cast<int>(xDiff / 2);
+    const int startPosition_y = static_cast<int>(yDiff / 2);
+    src.copyTo(square(cv::Rect(startPosition_x, startPosition_y, src.cols, src.rows)));
 
-    //Paint in image from starting point
-    src.copyTo(square(cv::Rect(startPosition.x, startPosition.y, src.cols, src.rows)));
+#ifdef _DEBUG
+    imshow("", square);
+#endif
 
-    //imshow("", square);
-
-    const string outputName = s + "_sq.jpg";
-    cout << "saving as " + outputName + "\n\n";
+    const string outputName = filename + "_sq.jpg";
+    cout << "Saving as " + outputName + "\n\n";
     imwrite(outputName, square);
   }
   
