@@ -12,7 +12,7 @@ void GetAllImagesInCurrentFolder(vector<wstring>& v)
   wchar_t buff[MAX_PATH] = { 0 };
 
   GetModuleFileName(NULL, buff, MAX_PATH);
-  int posWack = wcslen(buff) - 1;
+  size_t posWack = wcslen(buff) - 1;
   while (buff[posWack] != '\\')
   {
     --posWack;
@@ -35,6 +35,13 @@ void GetAllImagesInCurrentFolder(vector<wstring>& v)
 
 void main()
 {
+  //AL.
+  //For debugging!
+  #ifdef _DEBUG
+  MessageBox(nullptr, L"Attach", L"", 0);
+  #endif
+  //
+
   vector<wstring> allImagesInCurrentFolder;
   GetAllImagesInCurrentFolder(allImagesInCurrentFolder);
 
@@ -76,15 +83,7 @@ void main()
     }
 
     //Paint in image from starting point
-    for (int y = 0; y < src.rows; ++y)
-    {
-      for (int x = 0; x < src.cols; ++x)
-      {
-        auto pxSq = square.at<cv::Vec3b>(cv::Point(x + startPosition.x, y + startPosition.y));
-        const auto pxSrc = src.at<cv::Vec3b>(cv::Point(x, y));
-        pxSq = pxSrc;
-      }
-    }
+    src.copyTo(square(cv::Rect(startPosition.x, startPosition.y, src.cols, src.rows)));
 
     //imshow("", square);
 
