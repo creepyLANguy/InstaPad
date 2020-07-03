@@ -26,3 +26,11 @@
 *.exe
 *.out
 *.app
+
+Instapad/.vs/
+
+Instapad/Instapad/x64/
+
+*.user
+
+Instapad/x64/

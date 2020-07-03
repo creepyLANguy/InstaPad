@@ -7,8 +7,36 @@
 
 using namespace std;
 
+const wchar_t* extensions[] = 
+{ 
+  L".jpg",
+  L".jpeg",
+  L".png"
+  L".bmp"
+};
+
+bool IsFileExtensionInWhitelist(const wchar_t* fileName)
+{
+  for (const auto extension : extensions)
+  {
+    if (wcsstr(fileName, extension))
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void GetAllImagesInCurrentFolder(vector<wstring>& v)
 {
+  cout << "Extensions in whitelist:\n\n";
+  for (const auto extension : extensions)
+  {
+    wcout << extension << "\n";
+  }
+  cout << '\n';
+
   wchar_t buff[MAX_PATH] = { 0 };
 
   GetModuleFileName(NULL, buff, MAX_PATH);
@@ -22,13 +50,16 @@ void GetAllImagesInCurrentFolder(vector<wstring>& v)
 
   WIN32_FIND_DATA data;
   HANDLE hFind;
-  if ((hFind = FindFirstFile(buff, &data)) != INVALID_HANDLE_VALUE) {
-    do {
-      if (wcsstr(data.cFileName, L".jpg"))
+  if ((hFind = FindFirstFile(buff, &data)) != INVALID_HANDLE_VALUE) 
+  {
+    do 
+    {
+      if (IsFileExtensionInWhitelist(data.cFileName))
       {
         v.emplace_back(data.cFileName);
       }
     } while (FindNextFile(hFind, &data) != 0);
+
     FindClose(hFind);
   }
 }
