@@ -11,7 +11,7 @@ const wchar_t* extensions[] =
 { 
   L".jpg",
   L".jpeg",
-  L".png"
+  L".png",
   L".bmp"
 };
 
