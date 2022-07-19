@@ -6,6 +6,7 @@
 #define WIN32_LEAN_AND_MEAN 
 
 using namespace std;
+using namespace cv;
 
 const wchar_t* extensions[] = 
 { 
@@ -14,6 +15,16 @@ const wchar_t* extensions[] =
   L".png",
   L".bmp"
 };
+
+void PrintAllSupportedExtensions()
+{
+  cout << "Extensions in whitelist:\n";
+  for (const auto extension : extensions)
+  {
+    wcout << extension << "\n";
+  }
+  cout << '\n';
+}
 
 bool IsFileExtensionInWhitelist(const wchar_t* fileName)
 {
@@ -30,13 +41,6 @@ bool IsFileExtensionInWhitelist(const wchar_t* fileName)
 
 void GetAllImagesInCurrentFolder(vector<wstring>& v)
 {
-  cout << "Extensions in whitelist:\n\n";
-  for (const auto extension : extensions)
-  {
-    wcout << extension << "\n";
-  }
-  cout << '\n';
-
   wchar_t buff[MAX_PATH] = { 0 };
 
   GetModuleFileName(NULL, buff, MAX_PATH);
@@ -64,57 +68,77 @@ void GetAllImagesInCurrentFolder(vector<wstring>& v)
   }
 }
 
-void main()
+void PrintAllImageFilenamesFoundInCurrentFolder(const vector<wstring>& allImagesInCurrentFolder)
 {
-#ifdef _DEBUG
-  MessageBox(nullptr, L"Attach", L"", 0);
-#endif
-
-  vector<wstring> allImagesInCurrentFolder;
-  GetAllImagesInCurrentFolder(allImagesInCurrentFolder);
-
-  cout << "Images found in folder:\n\n";
+  cout << "Images found in folder:\n";
   for (const auto f : allImagesInCurrentFolder)
   {
     wcout << f << L"\n";
   }
   cout << "\n";
+}
 
+void ShowImage(const string& title, const Mat& mat, bool await = false)
+{
+  imshow(title, mat);
 
+  if (await == true) 
+  {
+    waitKey(0);
+  }
+}
+
+void SaveFile(const string& filename, const Mat& mat)
+{
+  cout << "Saving as " + filename + "\n\n";
+  imwrite(filename, mat);
+}
+
+void DetectEdges(const Mat& mat)
+{
+  //AL.
+
+}
+
+void ProcessAllImages(const vector<wstring>& allImagesInCurrentFolder)
+{
   for (wstring ws : allImagesInCurrentFolder)
   {
     const string filename(ws.begin(), ws.end());
-    const cv::Mat src = cv::imread(filename);
-    const int maxLen = max(src.rows, src.cols);
-    cv::Mat square = cv::Mat(maxLen, maxLen, src.type());
+    const Mat src = imread(filename);
 
-    if (maxLen == 0)
+    if (src.data == nullptr)
     {
       cout << "ERROR READING " + filename + "\n";
       continue;
     }
 
-    cout << "Converting " + filename + "\n";
+    cout << "Processing " + filename + "\n";
 
-    //Paint square white
-    square.setTo(cv::Scalar(255, 255, 255));
-    
-    //Paint in image from adjusted starting point
-    const int xDiff = maxLen - src.cols;
-    const int yDiff = maxLen - src.rows;
-    const int startPosition_x = static_cast<int>(xDiff / 2);
-    const int startPosition_y = static_cast<int>(yDiff / 2);
-    src.copyTo(square(cv::Rect(startPosition_x, startPosition_y, src.cols, src.rows)));
+    DetectEdges(src);
 
 #ifdef _DEBUG
-    imshow("", square);
+    ShowImage(filename, src);
 #endif
 
-    const string outputName = filename + "_sq.jpg";
-    cout << "Saving as " + outputName + "\n\n";
-    imwrite(outputName, square);
+    //SaveFile(filename + "_processed.jpg", src);
   }
-  
+}
 
+void main()
+{
+#ifdef _DEBUG
+  MessageBox(nullptr, L"Attach", L"", 0);
+#endif 
+
+  PrintAllSupportedExtensions();
+
+  vector<wstring> allImagesInCurrentFolder;
+  GetAllImagesInCurrentFolder(allImagesInCurrentFolder);
+  PrintAllImageFilenamesFoundInCurrentFolder(allImagesInCurrentFolder);
+
+  ProcessAllImages(allImagesInCurrentFolder);
+
+  waitKey(0);
 }
 
