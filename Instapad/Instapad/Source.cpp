@@ -1,4 +1,5 @@
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <windows.h>
 #include <iostream>
 #include <vector>
@@ -94,10 +95,24 @@ void SaveFile(const string& filename, const Mat& mat)
   imwrite(filename, mat);
 }
 
-void DetectEdges(const Mat& mat)
+void DetectEdges(const Mat& src)
 {
-  //AL.
+  // Convert to graycsale
+  Mat img_gray;
+  cvtColor(src, img_gray, COLOR_BGR2GRAY);
+  
+  // Blur the image for better edge detection
+  Mat img_blur;
+  GaussianBlur(img_gray, img_blur, Size(3,3), 0);
+  
+  // Canny edge detection
+  Mat edges;
+  Canny(img_blur, edges, 100, 200, 3, false);
 
+#ifdef _DEBUG
+  // Display canny edge detected image
+  ShowImage(to_string(rand()), edges);
+#endif
 }
 
 void ProcessAllImages(const vector<wstring>& allImagesInCurrentFolder)
@@ -115,11 +130,11 @@ void ProcessAllImages(const vector<wstring>& allImagesInCurrentFolder)
 
     cout << "Processing " + filename + "\n";
 
-    DetectEdges(src);
-
 #ifdef _DEBUG
     ShowImage(filename, src);
 #endif
+
+    DetectEdges(src);
 
     //SaveFile(filename + "_processed.jpg", src);
   }
