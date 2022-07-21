@@ -81,6 +81,7 @@ void PrintAllImageFilenamesFoundInCurrentFolder(const vector<wstring>& allImages
 
 void ShowImage(const string& title, const Mat& mat, bool await = false)
 {
+  namedWindow(title, WINDOW_NORMAL);
   imshow(title, mat);
 
   if (await == true) 
@@ -97,17 +98,18 @@ void SaveFile(const string& filename, const Mat& mat)
 
 void DetectEdges(const Mat& src)
 {
-  // Convert to graycsale
+  //Graycsale
   Mat img_gray;
   cvtColor(src, img_gray, COLOR_BGR2GRAY);
   
-  // Blur the image for better edge detection
+  //Blur
   Mat img_blur;
   GaussianBlur(img_gray, img_blur, Size(3,3), 0);
   
-  // Canny edge detection
+  //Edge detection
   Mat edges;
   Canny(img_blur, edges, 100, 200, 3, false);
+  //Sobel(img_blur, edges, CV_64F, 1, 0, 1);
 
 #ifdef _DEBUG
   // Display canny edge detected image
